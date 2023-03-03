@@ -1,3 +1,4 @@
 # COMP3100 Project
-# Isac Kim
+## Name: Isac Kim
+## Student ID: 46231218
 
