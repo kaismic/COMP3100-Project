@@ -1,37 +1,37 @@
 import java.net.*;
 import java.io.*;
 
-class DSClient{
-    public static void main(String args[])throws Exception{
-        Socket s=new Socket("localhost", 6561);
+public class DSServer {
+    public static void main(String[] args) throws Exception {
+        ServerSocket ss=new ServerSocket(6561);
+        Socket s=ss.accept();
         DataInputStream din=new DataInputStream(s.getInputStream());
         DataOutputStream dout=new DataOutputStream(s.getOutputStream());
         BufferedReader br=new BufferedReader(new InputStreamReader(System.in));
 
         String inStr = "";
         String outStr = "";
-
-        dout.writeUTF("HELO");
-        dout.flush();
         loop1:
         while(true){
-            // outStr=br.readLine();
-            // dout.writeUTF(outStr);
-            // dout.flush();
-
             inStr=din.readUTF();
             System.out.println(inStr);
             switch (inStr) {
-                case "G'DAY":
-                    dout.writeUTF("BYE");
+                case "HELO":
+                    dout.writeUTF("G'DAY");
                     dout.flush();
                     break;
                 case "BYE":
+                    dout.writeUTF("BYE");
+                    dout.flush();
                     break loop1;
             }
-        }
 
-        dout.close();
+            // OutStr=br.readLine();
+            // dout.writeUTF(OutStr);
+            // dout.flush();
+        }
+        din.close();
         s.close();
+        ss.close();
     }
 }
