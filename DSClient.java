@@ -2,13 +2,15 @@ import java.net.Socket;
 import java.io.*;
 
 public class DSClient {
-    static final String[] schedAlgs = { "lrr" };
     static final int MAX_PORT_NUM = 65535;
     static final int MIN_PORT_NUM = 49152;
     static final String MAX_PORT_NUM_STRING = String.valueOf(MAX_PORT_NUM);
     static final String MIN_PORT_NUM_STRING = String.valueOf(MIN_PORT_NUM);
     static final String PORT_RANGE_STRING = "{" + MIN_PORT_NUM_STRING + " ~ " + MAX_PORT_NUM_STRING + "}";
+    static final String IP_ADDRESS = "localhost";
     static final String AUTH_INFO = "isac";
+
+    static final String[] schedAlgs = { "lrr" };
 
     static String schedAlg = "lrr";
     static boolean verbose = false;
@@ -42,7 +44,6 @@ public class DSClient {
     static Socket socket;
     static DataInputStream inStream;
     static DataOutputStream outStream;
-    static BufferedReader bufferedReader;
 
     static void sendMessage(String msg) throws IOException {
         outStream.writeUTF(msg);
@@ -72,8 +73,7 @@ public class DSClient {
         }
         for (int i = 0; i < args.length; i++) {
             String arg = args[i];
-            switch (arg)
-            {
+            switch (arg) {
                 case "-h":
                     showHelp();
                     return;
@@ -127,14 +127,13 @@ public class DSClient {
             }
         }
 
-        socket = new Socket("localhost", portNum);
+        socket = new Socket(IP_ADDRESS, portNum);
         inStream = new DataInputStream(socket.getInputStream());
         outStream = new DataOutputStream(socket.getOutputStream());
-        bufferedReader = new BufferedReader(new InputStreamReader(System.in));
 
         String inString = "";
 
-        // HELO
+        // Send HELO
         sendMessage("HELO");
 
         // Receive OK first time
@@ -183,6 +182,7 @@ public class DSClient {
         //     }
         // }
 
+        inStream.close();
         outStream.close();
         socket.close();
     }
