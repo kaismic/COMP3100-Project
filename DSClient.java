@@ -34,6 +34,11 @@ public class DSClient {
         showHelp();
     }
 
+    static void notifyInvalidNumFormat(String param) {
+        System.out.println(param + ": Invalid number format!");
+        showHelp();
+    }
+
     static Socket socket;
     static DataInputStream inStream;
     static DataOutputStream outStream;
@@ -99,12 +104,23 @@ public class DSClient {
                             }
                             break;
                         case "-p":
+                            // first check port range by string length
                             if (param.length() < MIN_PORT_NUM_STRING.length()
                                     || param.length() > MAX_PORT_NUM_STRING.length()) {
                                 notifyPortOutOfRange(param);
                                 return;
                             } else {
-                                portNum = Integer.parseInt(param);
+                                try {
+                                    portNum = Integer.parseInt(param);
+                                } catch (NumberFormatException e) {
+                                    notifyInvalidNumFormat(param);
+                                    return;
+                                }
+                                // second check port range after parsing the parameter to int
+                                if (portNum < MIN_PORT_NUM || portNum > MAX_PORT_NUM) {
+                                    notifyPortOutOfRange(param);
+                                    return;
+                                }
                             }
                             break;
                     }
