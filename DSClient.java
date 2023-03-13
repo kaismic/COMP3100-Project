@@ -2,40 +2,10 @@ import java.net.Socket;
 import java.io.*;
 
 public class DSClient {
-    static final int MAX_PORT_NUM = 65535;
-    static final int MIN_PORT_NUM = 49152;
-    static final String MAX_PORT_NUM_STRING = String.valueOf(MAX_PORT_NUM);
-    static final String MIN_PORT_NUM_STRING = String.valueOf(MIN_PORT_NUM);
-    static final String PORT_RANGE_STRING = "{" + MIN_PORT_NUM_STRING + " ~ " + MAX_PORT_NUM_STRING + "}";
     static final String IP_ADDRESS = "localhost";
     static final String AUTH_INFO = "isac";
 
     static int portNum = 50000;
-
-    static void showHelp() {
-        System.out.println("Usage:");
-        System.out.println("            java DSClient.java [-h] [-v] [-p " + PORT_RANGE_STRING + "] -a lrr");
-    }
-
-    static void printArgRequired(String arg) {
-        System.out.println("Option " + arg + " requires an argument");
-        showHelp();
-    }
-
-    static void printInvalidAlg(String param) {
-        System.out.println("Err: invalid algorithm (" + param + ")!");
-        showHelp();
-    }
-
-    static void printPortOutOfRange(String param) {
-    System.out.println(param + ": Out of TCP/IP port range! " + PORT_RANGE_STRING);
-        showHelp();
-    }
-
-    static void printInvalidNumFormat(String param) {
-        System.out.println(param + ": Invalid number format!");
-        showHelp();
-    }
 
     static Socket socket;
     static DataInputStream inStream;
