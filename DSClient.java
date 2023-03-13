@@ -10,10 +10,6 @@ public class DSClient {
     static final String IP_ADDRESS = "localhost";
     static final String AUTH_INFO = "isac";
 
-    static final String[] schedAlgs = { "lrr" };
-
-    static String schedAlg = "lrr";
-    static boolean verbose = false;
     static int portNum = 50000;
 
     static void showHelp() {
@@ -21,22 +17,22 @@ public class DSClient {
         System.out.println("            java DSClient.java [-h] [-v] [-p " + PORT_RANGE_STRING + "] -a lrr");
     }
 
-    static void notifyArgRequired(String arg) {
+    static void printArgRequired(String arg) {
         System.out.println("Option " + arg + " requires an argument");
         showHelp();
     }
 
-    static void notifyInvalidAlg(String param) {
+    static void printInvalidAlg(String param) {
         System.out.println("Err: invalid algorithm (" + param + ")!");
         showHelp();
     }
 
-    static void notifyPortOutOfRange(String param) {
-        System.out.println(param + ": Out of TCP/IP port range! " + PORT_RANGE_STRING);
+    static void printPortOutOfRange(String param) {
+    System.out.println(param + ": Out of TCP/IP port range! " + PORT_RANGE_STRING);
         showHelp();
     }
 
-    static void notifyInvalidNumFormat(String param) {
+    static void printInvalidNumFormat(String param) {
         System.out.println(param + ": Invalid number format!");
         showHelp();
     }
@@ -58,75 +54,6 @@ public class DSClient {
     }
 
     public static void main(String args[]) throws Exception {
-        /*
-         * options:
-         * -h: show help
-         * -v: verbose show detailed information during simulation
-         * -a: select algorithm
-         * -p: select port number
-         */
-
-        // if there is no arguments then exit
-        if (args.length == 0) {
-            showHelp();
-            return;
-        }
-        for (int i = 0; i < args.length; i++) {
-            String arg = args[i];
-            switch (arg) {
-                case "-h":
-                    showHelp();
-                    return;
-                case "-v":
-                    // TODO
-                    break;
-                default:
-                    i++;
-                    // if this argument is the last argument then exit
-                    if (i == args.length) {
-                        notifyArgRequired(arg);
-                        return;
-                    }
-                    String param = args[i];
-                    switch (arg) {
-                        case "-a":
-                            // check if the given algorithm is a valid algorithm
-                            boolean isValid = false;
-                            for (int j = 0; j < schedAlgs.length; j++) {
-                                if (schedAlgs[j].equals(param)) {
-                                    isValid = true;
-                                    break;
-                                }
-                            }
-                            if (!isValid) {
-                                notifyInvalidAlg(param);
-                                return;
-                            }
-                            break;
-                        case "-p":
-                            // first check port range by string length
-                            if (param.length() < MIN_PORT_NUM_STRING.length()
-                                    || param.length() > MAX_PORT_NUM_STRING.length()) {
-                                notifyPortOutOfRange(param);
-                                return;
-                            } else {
-                                try {
-                                    portNum = Integer.parseInt(param);
-                                } catch (NumberFormatException e) {
-                                    notifyInvalidNumFormat(param);
-                                    return;
-                                }
-                                // second check port range after parsing the parameter to int
-                                if (portNum < MIN_PORT_NUM || portNum > MAX_PORT_NUM) {
-                                    notifyPortOutOfRange(param);
-                                    return;
-                                }
-                            }
-                            break;
-                    }
-            }
-        }
-
         socket = new Socket(IP_ADDRESS, portNum);
         inStream = new DataInputStream(socket.getInputStream());
         outStream = new DataOutputStream(socket.getOutputStream());
