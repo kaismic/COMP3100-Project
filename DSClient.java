@@ -35,9 +35,15 @@ public class DSClient {
         sendMessage(outStream, "HELO");
 
         // Receive OK first time
-        readMessage(inStream);
+        inString = readMessage(inStream);
+
+        sendMessage(outStream, "AUTH " + AUTH_INFO);
 
         // Receive OK second time
+        inString = readMessage(inStream);
+
+        sendMessage(outStream, "REDY");
+
         readMessage(inStream);
 
         // quit early
