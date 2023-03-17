@@ -35,27 +35,9 @@ public class DSClient {
         sendMessage(outStream, "HELO");
 
         // Receive OK first time
-        inString = readMessage(inStream);
-        if (inString.equals("OK")) {
-            sendMessage(outStream, "AUTH " + AUTH_INFO);
-        } else {
-            System.out.println("Server not OK");
-            outStream.close();
-            socket.close();
-            return;
-        }
+        readMessage(inStream);
 
         // Receive OK second time
-        inString = readMessage(inStream);
-        if (inString.equals("OK")) {
-            sendMessage(outStream, "REDY");
-        } else {
-            System.out.println("Server not OK");
-            outStream.close();
-            socket.close();
-            return;
-        }
-
         readMessage(inStream);
 
         // quit early
