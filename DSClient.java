@@ -8,24 +8,24 @@ public class DSClient {
     static int portNum = 50000;
 
     static Socket socket;
-    static DataInputStream inStream;
+    static BufferedReader inStream;
     static DataOutputStream outStream;
 
     static void sendMessage(String msg) throws IOException {
-        outStream.writeUTF(msg);
+        outStream.write((msg+"\n").getBytes());
         outStream.flush();
         System.out.println("(Client) Sent: " + msg);
     }
 
     static String readMessage() throws IOException {
-        String msg = inStream.readUTF();
+        String msg = inStream.readLine();
         System.out.println("(Server) Received: " + msg);
         return msg;
     }
 
     public static void main(String args[]) throws Exception {
         socket = new Socket(IP_ADDRESS, portNum);
-        inStream = new DataInputStream(socket.getInputStream());
+        BufferedReader inStream = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         outStream = new DataOutputStream(socket.getOutputStream());
 
         String inString = "";
