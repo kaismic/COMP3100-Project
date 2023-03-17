@@ -1,5 +1,8 @@
 import java.net.Socket;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.DataOutputStream;
+import java.io.IOException;
 
 public class DSClient {
     static final String IP_ADDRESS = "localhost";
@@ -8,35 +11,33 @@ public class DSClient {
     static int portNum = 50000;
 
     static Socket socket;
-    static BufferedReader inStream;
-    static DataOutputStream outStream;
 
-    static void sendMessage(String msg) throws IOException {
+    static void sendMessage(DataOutputStream outStream, String msg) throws IOException {
         outStream.write((msg+"\n").getBytes());
         outStream.flush();
-        System.out.println("(Client) Sent: " + msg);
+        System.out.println("SENT: " + msg);
     }
 
-    static String readMessage() throws IOException {
+    static String readMessage(BufferedReader inStream) throws IOException {
         String msg = inStream.readLine();
-        System.out.println("(Server) Received: " + msg);
+        System.out.println("RCVD: " + msg);
         return msg;
     }
 
     public static void main(String args[]) throws Exception {
         socket = new Socket(IP_ADDRESS, portNum);
         BufferedReader inStream = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        outStream = new DataOutputStream(socket.getOutputStream());
+        DataOutputStream outStream = new DataOutputStream(socket.getOutputStream());
 
         String inString = "";
 
         // Send HELO
-        sendMessage("HELO");
+        sendMessage(outStream, "HELO");
 
         // Receive OK first time
-        inString = readMessage();
+        inString = readMessage(inStream);
         if (inString.equals("OK")) {
-            sendMessage("AUTH" + AUTH_INFO);
+            sendMessage(outStream, "AUTH " + AUTH_INFO);
         } else {
             System.out.println("Server not OK");
             outStream.close();
@@ -45,9 +46,9 @@ public class DSClient {
         }
 
         // Receive OK second time
-        inString = readMessage();
+        inString = readMessage(inStream);
         if (inString.equals("OK")) {
-            sendMessage("REDY");
+            sendMessage(outStream, "REDY");
         } else {
             System.out.println("Server not OK");
             outStream.close();
@@ -55,12 +56,12 @@ public class DSClient {
             return;
         }
 
-        readMessage();
+        readMessage(inStream);
 
         // quit early
-        sendMessage("QUIT");
+        sendMessage(outStream, "QUIT");
 
-        readMessage();
+        readMessage(inStream);
         // loop1:
         // while(true){
         //     // outStr=br.readLine();
