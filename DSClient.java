@@ -10,8 +10,6 @@ public class DSClient {
 
     static int portNum = 50000;
 
-    static Socket socket;
-
     static void sendMessage(DataOutputStream outStream, String msg) throws IOException {
         outStream.write((msg+"\n").getBytes());
         outStream.flush();
@@ -25,7 +23,7 @@ public class DSClient {
     }
 
     public static void main(String args[]) throws Exception {
-        socket = new Socket(IP_ADDRESS, portNum);
+        Socket socket = new Socket(IP_ADDRESS, portNum);
         BufferedReader inStream = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         DataOutputStream outStream = new DataOutputStream(socket.getOutputStream());
 
