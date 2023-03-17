@@ -16,57 +16,35 @@ public class DSClient {
         System.out.println("SENT: " + msg);
     }
 
-    static String readMessage(BufferedReader inStream) throws IOException {
-        String msg = inStream.readLine();
+    static String readMessage(BufferedReader reader) throws IOException {
+        String msg = reader.readLine();
         System.out.println("RCVD: " + msg);
         return msg;
     }
 
     public static void main(String args[]) throws Exception {
         Socket socket = new Socket(IP_ADDRESS, portNum);
-        BufferedReader inStream = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         DataOutputStream outStream = new DataOutputStream(socket.getOutputStream());
 
         String inString = "";
 
+        // Handshake
         // Send HELO
         sendMessage(outStream, "HELO");
-
         // Receive OK first time
-        inString = readMessage(inStream);
-
+        inString = readMessage(reader);
         sendMessage(outStream, "AUTH " + AUTH_INFO);
-
         // Receive OK second time
-        inString = readMessage(inStream);
-
+        inString = readMessage(reader);
         sendMessage(outStream, "REDY");
-
-        readMessage(inStream);
+        readMessage(reader);
 
         // quit early
         sendMessage(outStream, "QUIT");
+        readMessage(reader);
 
-        readMessage(inStream);
-        // loop1:
-        // while(true){
-        //     // outStr=br.readLine();
-        //     // dout.writeUTF(outStr);
-        //     // dout.flush();
-
-        //     inString=inStream.readUTF();
-        //     System.out.println(inString);
-        //     switch (inString) {
-        //         case "OK":
-        //             outStream.writeUTF("AUTH isac");
-        //             outStream.flush();
-        //             break;
-        //         case "BYE":
-        //             break loop1;
-        //     }
-        // }
-
-        inStream.close();
+        reader.close();
         outStream.close();
         socket.close();
     }
