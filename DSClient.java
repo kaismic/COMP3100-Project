@@ -3,7 +3,6 @@ import java.util.Scanner;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.DataOutputStream;
-import java.io.File;
 import java.io.IOException;
 
 public class DSClient {
@@ -12,82 +11,111 @@ public class DSClient {
 
     static int portNum = 50000;
 
-    static void sendMessage(DataOutputStream outStream, String msg) throws IOException {
+    static Socket socket;
+    static BufferedReader reader;
+    static DataOutputStream outStream;
+    static Scanner scanner;
+
+    static int serverNum;
+    static String largestServerType;
+    static int largestServerLimit;
+    static int curServerID;
+
+    static void sendMessage(String msg) throws IOException {
         outStream.write((msg+"\n").getBytes());
         outStream.flush();
         System.out.println("SENT: " + msg);
     }
 
-    static String readMessage(BufferedReader reader) throws IOException {
+    static String readMessage() throws IOException {
         String msg = reader.readLine();
+        if (msg == "ERR") {
+            quitProgram();
+        }
         System.out.println("RCVD: " + msg);
         return msg;
     }
 
-    public static void main(String args[]) throws Exception {
-        Socket socket = new Socket(IP_ADDRESS, portNum);
-        BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        DataOutputStream outStream = new DataOutputStream(socket.getOutputStream());
-        Scanner scanner;
+    static void quitProgram() throws IOException  {
+        sendMessage("QUIT");
+        readMessage();
 
-        String msg;
-        String arg;
+        reader.close();
+        outStream.close();
+        socket.close();
+    }
+
+    public static void main(String args[]) throws Exception {
+        socket = new Socket(IP_ADDRESS, portNum);
+        reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        outStream = new DataOutputStream(socket.getOutputStream());
+
+        String receivedMsg;
+        String command;
         // Handshake
         // Send HELO
-        sendMessage(outStream, "HELO");
+        sendMessage("HELO");
         // Receive OK first time
-        readMessage(reader);
-        sendMessage(outStream, "AUTH " + AUTH_INFO);
+        readMessage();
+        sendMessage("AUTH " + AUTH_INFO);
         // Receive OK second time
-        readMessage(reader);
+        readMessage();
+        // Send ready message
+        sendMessage("REDY");
+        readMessage();
 
-        sendMessage(outStream, "REDY");
-
-        sendMessage(outStream, "GETS all");
-        msg = readMessage(reader);
-        scanner = new Scanner(msg);
+        // get server state information
+        sendMessage("GETS All");
+        receivedMsg = readMessage();
+        scanner = new Scanner(receivedMsg);
         scanner.next(); // skip DATA
-
-        int serverNum = scanner.nextInt();
-
+        serverNum = scanner.nextInt();
         scanner.close();
-        sendMessage(outStream, "OK");
+        sendMessage("OK");
         for (int i = 0; i < serverNum - 1; i++) {
-            readMessage(reader);
+            readMessage();
         }
-        msg = readMessage(reader);
-        scanner = new Scanner(msg);
-
-        String largestServerType = scanner.next();
-        int largestServerLimit = scanner.nextInt() + 1;
-
+        receivedMsg = readMessage();
+        scanner = new Scanner(receivedMsg);
+        largestServerType = scanner.next();
+        largestServerLimit = scanner.nextInt() + 1;
         scanner.close();
+        curServerID = 0;
 
-        int curServerID = 0;
+        sendMessage("OK");
+        readMessage();
+        sendMessage("REDY");
 
         mainLoop: while (true) {
-            msg = readMessage(reader);
-            scanner = new Scanner(msg);
-            arg = scanner.next();
+            receivedMsg = readMessage();
+            scanner = new Scanner(receivedMsg);
+            command = scanner.next();
 
-            switch (arg) {
+            switch (command) {
+                case "ERR":
+                    break mainLoop;
                 case "NONE":
                     break mainLoop;
+                case "OK":
+                    sendMessage("REDY");
+                    break;
                 case "JOBN":
-                    int sumbitTime = scanner.nextInt();
+                    // int sumbitTime =
+                    scanner.nextInt();
                     int jobID = scanner.nextInt();
                     // int estRunTime = scanner.nextInt();
                     // int core = scanner.nextInt();
                     // int memory = scanner.nextInt();
                     // int disk = scanner.nextInt();
-                    String msgToSend = "SCHD" + jobID + largestServerType + curServerID;
+                    // LRR algorithm i guess?
+                    String msgToSend = "SCHD " + jobID + " " + largestServerType + " " +curServerID;
                     curServerID = (curServerID + 1) % largestServerLimit;
-                    sendMessage(outStream, msgToSend);
+                    sendMessage(msgToSend);
                     break;
                 case "JOBP":
                     break mainLoop;
                 case "JCPL":
-                    sendMessage(outStream, "REDY");
+                    sendMessage("REDY");
                     break;
                 case "RESF":
                     break mainLoop;
@@ -99,12 +127,6 @@ public class DSClient {
             scanner.close();
         }
 
-        // quit
-        sendMessage(outStream, "QUIT");
-        readMessage(reader);
-
-        reader.close();
-        outStream.close();
-        socket.close();
+        quitProgram();
     }
 }
