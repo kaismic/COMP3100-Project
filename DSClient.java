@@ -24,7 +24,7 @@ public class DSClient {
     static void sendMessage(String msg) throws IOException {
         outStream.write((msg+"\n").getBytes());
         outStream.flush();
-        System.out.println("SENT: " + msg);
+        System.out.println("C SENT: " + msg);
     }
 
     static String readMessage() throws IOException {
@@ -32,7 +32,7 @@ public class DSClient {
         if (msg == "ERR") {
             quitProgram();
         }
-        System.out.println("RCVD: " + msg);
+        System.out.println("C RCVD: " + msg);
         return msg;
     }
 
