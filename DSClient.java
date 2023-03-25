@@ -19,7 +19,7 @@ public class DSClient {
     static int serverNum;
     static String largestServerType;
     static int largestServerLimit;
-    static int curServerID;
+    static int curServerID = 0;
 
     static void sendMessage(String msg) throws IOException {
         outStream.write((msg+"\n").getBytes());
@@ -62,28 +62,41 @@ public class DSClient {
         readMessage();
         // Send ready message
         sendMessage("REDY");
-        readMessage();
+
+        // Receive JOBN
+        receivedMsg = readMessage();
+        scanner = new Scanner(receivedMsg);
+        scanner.next(); // skip JOBN
+
+        scanner.nextInt(); // skip sumbitTime
+        scanner.nextInt(); // skip jobID
+        scanner.nextInt(); // skip estRunTime
+        int core = scanner.nextInt();
+        int memory = scanner.nextInt();
+        int disk = scanner.nextInt();
+        scanner.close();
 
         // get server state information
-        sendMessage("GETS All");
+        sendMessage("GETS Capable " + core + " " + memory + " " + disk);
         receivedMsg = readMessage();
         scanner = new Scanner(receivedMsg);
         scanner.next(); // skip DATA
         serverNum = scanner.nextInt();
         scanner.close();
+
         sendMessage("OK");
+        // ignore every other server info except the last one
         for (int i = 0; i < serverNum - 1; i++) {
             readMessage();
         }
-        receivedMsg = readMessage();
+        receivedMsg = readMessage(); // get last server info (largest server type)
         scanner = new Scanner(receivedMsg);
         largestServerType = scanner.next();
         largestServerLimit = scanner.nextInt() + 1;
         scanner.close();
-        curServerID = 0;
 
         sendMessage("OK");
-        readMessage();
+        readMessage(); // receive "."
         sendMessage("REDY");
 
         mainLoop: while (true) {
@@ -100,14 +113,13 @@ public class DSClient {
                     sendMessage("REDY");
                     break;
                 case "JOBN":
-                    // int sumbitTime =
-                    scanner.nextInt();
+                    scanner.nextInt(); // skip sumbitTime
                     int jobID = scanner.nextInt();
                     // int estRunTime = scanner.nextInt();
                     // int core = scanner.nextInt();
                     // int memory = scanner.nextInt();
                     // int disk = scanner.nextInt();
-                    // LRR algorithm i guess?
+                    // LRR algorithm
                     String msgToSend = "SCHD " + jobID + " " + largestServerType + " " +curServerID;
                     curServerID = (curServerID + 1) % largestServerLimit;
                     sendMessage(msgToSend);
@@ -126,7 +138,6 @@ public class DSClient {
             }
             scanner.close();
         }
-
         quitProgram();
     }
 }
