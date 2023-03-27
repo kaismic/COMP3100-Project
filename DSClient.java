@@ -16,7 +16,6 @@ public class DSClient {
     static DataOutputStream outStream;
     static Scanner scanner;
 
-    static int serverNum;
     static String largestServerType;
     static int largestServerLimit;
     static int curServerID = 0;
@@ -79,7 +78,7 @@ public class DSClient {
         receivedMsg = readMessage();
         scanner = new Scanner(receivedMsg);
         scanner.next(); // skip DATA
-        serverNum = scanner.nextInt();
+        int serverNum = scanner.nextInt();
         scanner.close();
 
         sendMessage("OK");
