@@ -29,9 +29,6 @@ public class DSClient {
 
     static String readMessage() throws IOException {
         String msg = reader.readLine();
-        if (msg == "ERR") {
-            quitProgram();
-        }
         System.out.println("C RCVD: " + msg);
         return msg;
     }
@@ -40,12 +37,13 @@ public class DSClient {
         sendMessage("QUIT");
         readMessage();
 
+        scanner.close();
         reader.close();
         outStream.close();
         socket.close();
     }
 
-    public static void main(String args[]) throws Exception {
+    public static void main(String args[]) throws IOException {
         socket = new Socket(IP_ADDRESS, portNum);
         reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         outStream = new DataOutputStream(socket.getOutputStream());
