@@ -1,6 +1,5 @@
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Scanner;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.DataOutputStream;
@@ -15,7 +14,6 @@ public class DSClient {
     static Socket socket;
     static BufferedReader reader;
     static DataOutputStream outStream;
-    static Scanner scanner;
 
     static String largestServerType;
     static int largestCoreCount = 0;
@@ -35,11 +33,14 @@ public class DSClient {
         return msg;
     }
 
+    static int atoi(String str) {
+        return Integer.parseInt(str);
+    }
+
     static void quitProgram() throws IOException {
         sendMessage("QUIT");
         readMessage();
 
-        scanner.close();
         reader.close();
         outStream.close();
         socket.close();
@@ -48,14 +49,13 @@ public class DSClient {
     static void getLargestServer() throws IOException {
         // get server state information
         sendMessage("GETS All");
-        scanner = new Scanner(readMessage());
-        scanner.next(); // skip DATA
-        int serverCount = scanner.nextInt();
-        scanner.close();
+        String[] receivedMsgs = readMessage().split(" ");
+        int serverCount = atoi(receivedMsgs[1]);
 
         sendMessage("OK");
 
         // gotta pick the server that comes first with the largest number of cores
+        // e.g.
         /* name     core   memory
          * medium    4      100
          * large     4      200
@@ -67,12 +67,10 @@ public class DSClient {
         int serverID;
 
         for (int i = 0; i < serverCount; i++) {
-            scanner = new Scanner(readMessage());
-            serverType = scanner.next();
-            serverID = scanner.nextInt();
-            scanner.next(); // skip state
-            scanner.next(); // skip curStartTime;
-            coreCount = scanner.nextInt();
+            receivedMsgs = readMessage().split(" ");
+            serverType = receivedMsgs[0];
+            serverID = atoi(receivedMsgs[1]);
+            coreCount = atoi(receivedMsgs[4]);
 
             if (coreCount > largestCoreCount) {
                 serverList.clear();
@@ -82,7 +80,6 @@ public class DSClient {
             } else if (serverType.equals(largestServerType)) {
                 serverList.add(serverID);
             }
-            scanner.close();
         }
 
         sendMessage("OK");
@@ -114,8 +111,8 @@ public class DSClient {
 
         String command;
         mainLoop: while (true) {
-            scanner = new Scanner(readMessage());
-            command = scanner.next();
+            String[] receivedMsgs = readMessage().split(" ");
+            command = receivedMsgs[0];
 
             switch (command) {
                 case "NONE":
@@ -124,13 +121,7 @@ public class DSClient {
                     sendMessage("REDY");
                     break;
                 case "JOBN":
-                    scanner.nextInt(); // skip sumbitTime
-                    int jobID = scanner.nextInt();
-                    // int estRunTime = scanner.nextInt();
-                    // int core = scanner.nextInt();
-                    // int memory = scanner.nextInt();
-                    // int disk = scanner.nextInt();
-
+                    int jobID = atoi(receivedMsgs[2]);
                     // LRR algorithm
                     int serverID = serverList.get(currServerIdx);
                     String msgToSend = "SCHD " + jobID + " " + largestServerType + " " +serverID;
@@ -153,7 +144,6 @@ public class DSClient {
                 default:
                     break mainLoop;
             }
-            scanner.close();
         }
         quitProgram();
     }
