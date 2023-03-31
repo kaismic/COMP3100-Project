@@ -1,7 +1,7 @@
 package commandindices;
 
 public enum JOBN {
-    submitTim    (1),
+    submitTime   (1),
     jobID        (2),
     estRunTime   (3),
     core         (4),
