@@ -1,11 +1,40 @@
 import java.net.Socket;
 import java.util.ArrayList;
+
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
 public class DSClient {
+    enum JOBN {
+        command,
+        submitTime,
+        jobID,
+        estRunTime,
+        core,
+        memory;
+    }
+
+    enum DATA {
+        command,
+        nRecs,
+        recLen;
+    }
+
+    enum GETS {
+        serverType,
+        serverID,
+        state,
+        curStartTime,
+        core,
+        memory,
+        disk,
+        waitingJobNum,
+        runningJobNum;
+    }
+
     static final String IP_ADDRESS = "localhost";
     static final String AUTH_INFO = "isac";
 
@@ -50,7 +79,7 @@ public class DSClient {
         // get server state information
         sendMessage("GETS All");
         String[] receivedMsgs = readMessage().split(" ");
-        int serverCount = atoi(receivedMsgs[1]);
+        int serverCount = atoi(receivedMsgs[DATA.nRecs.ordinal()]);
 
         sendMessage("OK");
 
@@ -68,9 +97,11 @@ public class DSClient {
 
         for (int i = 0; i < serverCount; i++) {
             receivedMsgs = readMessage().split(" ");
-            serverType = receivedMsgs[0];
-            serverID = atoi(receivedMsgs[1]);
-            coreCount = atoi(receivedMsgs[4]);
+
+
+            serverType = receivedMsgs[GETS.serverType.ordinal()];
+            serverID = atoi(receivedMsgs[GETS.serverID.ordinal()]);
+            coreCount = atoi(receivedMsgs[GETS.core.ordinal()]);
 
             if (coreCount > largestCoreCount) {
                 serverList.clear();
@@ -121,7 +152,7 @@ public class DSClient {
                     sendMessage("REDY");
                     break;
                 case "JOBN":
-                    int jobID = atoi(receivedMsgs[2]);
+                    int jobID = atoi(receivedMsgs[JOBN.jobID.ordinal()]);
                     // LRR algorithm
                     int serverID = serverList.get(currServerIdx);
                     String msgToSend = "SCHD " + jobID + " " + largestServerType + " " +serverID;
