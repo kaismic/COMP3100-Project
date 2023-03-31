@@ -1,15 +1,15 @@
 package commandindices;
 
 public enum GETS {
-    serverType     (1),
-    serverID       (2),
-    state          (3),
-    curStartTime   (4),
-    core           (5),
-    memory         (6),
-    disk           (7),
-    waitingJobNum  (8),
-    runningJobNum  (9);
+    serverType     (0),
+    serverID       (1),
+    state          (2),
+    curStartTime   (3),
+    core           (4),
+    memory         (5),
+    disk           (6),
+    waitingJobNum  (7),
+    runningJobNum  (8);
 
     public final int idx;
 
