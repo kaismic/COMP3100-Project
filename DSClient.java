@@ -62,8 +62,8 @@ public class DSClient {
     static void getLargestServer() throws IOException {
         // get server state information
         sendMessage("GETS All");
-        String[] receivedMsgs = readMessage().split(" ");
-        int serverCount = atoi(receivedMsgs[DATA.nRecs.ordinal()]);
+        String[] receivedMsg = readMessage().split(" ");
+        int serverCount = atoi(receivedMsg[DATA.nRecs.ordinal()]);
 
         sendMessage("OK");
 
@@ -76,11 +76,11 @@ public class DSClient {
         // gotta pick medium not large
 
         for (int i = 0; i < serverCount; i++) {
-            receivedMsgs = readMessage().split(" ");
+            receivedMsg = readMessage().split(" ");
 
-            String serverType = receivedMsgs[GETS.serverType.ordinal()];
-            int coreCount = atoi(receivedMsgs[GETS.serverID.ordinal()]);
-            int serverID = atoi(receivedMsgs[GETS.core.ordinal()]);
+            String serverType = receivedMsg[GETS.serverType.ordinal()];
+            int coreCount = atoi(receivedMsg[GETS.serverID.ordinal()]);
+            int serverID = atoi(receivedMsg[GETS.core.ordinal()]);
 
             if (coreCount > largestCoreCount) {
                 serverList.clear();
