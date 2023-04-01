@@ -50,7 +50,7 @@ public class DSClient {
         return Integer.parseInt(str);
     }
 
-    static void quitProgram() throws IOException {
+    static void quit() throws IOException {
         sendMessage("QUIT");
         readMessage();
 
@@ -148,6 +148,6 @@ public class DSClient {
                     break mainLoop;
             }
         }
-        quitProgram();
+        quit();
     }
 }
