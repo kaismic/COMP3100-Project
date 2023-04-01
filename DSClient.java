@@ -8,30 +8,15 @@ import java.io.IOException;
 
 public class DSClient {
     enum JOBN {
-        command,
-        submitTime,
-        jobID,
-        estRunTime,
-        core,
-        memory;
+        command, submitTime, jobID, estRunTime, core, memory;
     }
 
     enum DATA {
-        command,
-        nRecs,
-        recLen;
+        command, nRecs, recLen;
     }
 
     enum GETS {
-        serverType,
-        serverID,
-        state,
-        curStartTime,
-        core,
-        memory,
-        disk,
-        waitingJobNum,
-        runningJobNum;
+        serverType, serverID, state, curStartTime, core, memory, disk, waitingJobNum, runningJobNum;
     }
 
     static final String IP_ADDRESS = "localhost";
@@ -97,7 +82,6 @@ public class DSClient {
         for (int i = 0; i < serverCount; i++) {
             receivedMsgs = readMessage().split(" ");
 
-
             serverType = receivedMsgs[GETS.serverType.ordinal()];
             serverID = atoi(receivedMsgs[GETS.serverID.ordinal()]);
             coreCount = atoi(receivedMsgs[GETS.core.ordinal()]);
@@ -111,7 +95,6 @@ public class DSClient {
                 serverList.add(serverID);
             }
         }
-
         sendMessage("OK");
         readMessage(); // receive "."
     }
