@@ -43,12 +43,12 @@ public class DSClient2 {
     static void sendMessage(String msg) throws IOException {
         outStream.write((msg+"\n").getBytes());
         outStream.flush();
-        // System.out.println("C SENT: " + msg);
+        System.out.println("C SENT: " + msg);
     }
 
     static String readMessage() throws IOException {
         String msg = reader.readLine();
-        // System.out.println("C RCVD: " + msg);
+        System.out.println("C RCVD: " + msg);
         return msg;
     }
 
@@ -101,9 +101,9 @@ public class DSClient2 {
         readMessage(); // receive "."
     }
 
-    static String getFirstCapable() throws IOException {
+    static String getFirstCapable(String core, String memory, String disk) throws IOException {
         // get server state information
-        sendMessage("GETS Capable");
+        sendMessage("GETS Capable " + core + " " + memory + " " + disk);
         String[] dataMsg = readMessage().split(" ");
         int serverCount = atoi(dataMsg[DATA.nRecs.ordinal()]);
 
@@ -138,12 +138,16 @@ public class DSClient2 {
                                 currAlg = ALG.FC;
                                 break;
                             default:
-                                System.out.println("Unsupported algorithm");
+                                System.out.println("Invalid algorithm");
                                 return;
                         }
+                    default:
+                        System.out.println("Invalid command");
+                        return;
                 }
             } else {
                 System.out.println("Invalid argument");
+                return;
             }
         }
 
@@ -164,49 +168,60 @@ public class DSClient2 {
 
         switch (currAlg) {
             case LRR:
+                lrrLoop: while (true) {
+                    String[] receivedMsgs = readMessage().split(" ");
+                    String command = receivedMsgs[0];
+                    if (largestServerType == null) {
+                        getLargestServer();
+                    }
+                    switch (command) {
+                        case "NONE":
+                            break lrrLoop;
+                        case "OK":
+                            sendMessage("REDY");
+                            break;
+                        case "JOBN":
+                            int jobID = atoi(receivedMsgs[JOBN.jobID.ordinal()]);
+                            // LRR algorithm
+                            int serverID = serverList.get(currServerIdx);
+                            String msgToSend = "SCHD " + jobID + " " + largestServerType + " " +serverID;
+                            currServerIdx = (currServerIdx + 1) % serverList.size();
+                            sendMessage(msgToSend);
+                            break;
+                        case "JCPL":
+                            sendMessage("REDY");
+                            break;
+                        default:
+                            break lrrLoop;
+                    }
+                }
                 break;
             case FC:
-            fcLoop: while (true) {
-                String[] receivedMsgs = readMessage().split(" ");
-                String command = receivedMsgs[0];
-
-                switch (command) {
-                    case "NONE":
-                        break fcLoop;
-                    case "OK":
-                        sendMessage("REDY");
-                        break;
-                    case "JOBN":
-                        int jobID = atoi(receivedMsgs[JOBN.jobID.ordinal()]);
-                        // LRR algorithm
-                        int serverID = serverList.get(currServerIdx);
-                        String msgToSend = "SCHD " + jobID + " " + largestServerType + " " +serverID;
-                        currServerIdx = (currServerIdx + 1) % serverList.size();
-                        sendMessage(msgToSend);
-                        break;
-                    case "JCPL":
-                        sendMessage("REDY");
-                        break;
-                    // case "ERR":
-                    //     break fcLoop;
-                    // case "JOBP":
-                    //     break fcLoop;
-                    // case "RESF":
-                    //     break fcLoop;
-                    // case "RESR":
-                    //     break fcLoop;
-                    // case "CHKQ":
-                    //     break fcLoop;
-                    default:
-                        break fcLoop;
+                fcLoop: while (true) {
+                    String[] msg = readMessage().split(" ");
+                    String command = msg[0];
+                    switch (command) {
+                        case "NONE":
+                            break fcLoop;
+                        case "OK":
+                            sendMessage("REDY");
+                            break;
+                        case "JOBN":
+                            String[] serverInfo = getFirstCapable(msg[JOBN.core.ordinal()],
+                                    msg[JOBN.memory.ordinal()], msg[JOBN.disk.ordinal()]).split(" ");
+                            String msgToSend = "SCHD " + msg[JOBN.jobID.ordinal()] + " "
+                                    + serverInfo[GETS.serverType.ordinal()] + " " + serverInfo[GETS.serverID.ordinal()];
+                            sendMessage(msgToSend);
+                            break;
+                        case "JCPL":
+                            sendMessage("REDY");
+                            break;
+                        default:
+                            break fcLoop;
+                    }
                 }
-            }
-            default:
                 break;
-            
         }
-
-
 
         quit();
     }
