@@ -111,12 +111,10 @@ public class DSClient2 {
 
         String firstCapable = "";
 
-        for (int i = 0; i < serverCount; i++) {
-            if (firstCapable.isEmpty()) {
-                firstCapable = readMessage();
-            } else {
-                readMessage();
-            }
+        firstCapable = readMessage();
+        // skip rest of the messages
+        for (int i = 0; i < serverCount - 1; i++) {
+            readMessage();
         }
         sendMessage("OK");
         readMessage(); // receive "."
@@ -126,8 +124,9 @@ public class DSClient2 {
 
     public static void main(String args[]) throws IOException {
         for (int i = 0; i < args.length; i++) {
-            if (args[i].charAt(0) == '-') {
-                switch (args[i].charAt(1)) {
+            String command = args[i];
+            if (command.charAt(0) == '-') {
+                switch (command.charAt(1)) {
                     case 'a':
                         i++; // next argument
                         switch (args[i].toLowerCase(Locale.ENGLISH)) {
@@ -141,6 +140,7 @@ public class DSClient2 {
                                 System.out.println("Invalid algorithm");
                                 return;
                         }
+                        break;
                     default:
                         System.out.println("Invalid command");
                         return;
