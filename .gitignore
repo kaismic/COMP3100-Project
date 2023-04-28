@@ -1,9 +1,10 @@
 *.xml
 *.class
 *.txt
+*.sh
+*.tar
 ds-client
 ds-server
 configs
 S1testConfigs
-S1Tests-wk6.sh
-week06.tar
+S1DemoConfigs
